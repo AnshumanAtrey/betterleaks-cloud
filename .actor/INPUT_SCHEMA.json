@@ -1,0 +1,503 @@
+{
+  "title": "Betterleaks Cloud - Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "mode": {
+      "title": "Scan mode",
+      "description": "Which betterleaks command to run. 'global_github' is our addition - GitHub Code Search picks candidate repos then runs betterleaks on each.",
+      "type": "string",
+      "editor": "select",
+      "default": "github",
+      "enum": [
+        "github",
+        "global_github",
+        "git",
+        "s3",
+        "dir",
+        "stdin"
+      ],
+      "enumTitles": [
+        "github - org, user, repo, PR, issue, gist, action, release (you specify the target)",
+        "global_github - search all of GitHub by keyword/pattern (we add this layer)",
+        "git - one clone URL (full history)",
+        "s3 - AWS S3 / Cloudflare R2 / MinIO bucket",
+        "dir - upload a tarball URL to scan filesystem",
+        "stdin - paste raw text content"
+      ],
+      "sectionCaption": "What to scan"
+    },
+    "target_url": {
+      "title": "Target URL (github / git / s3 modes)",
+      "description": "github: https://github.com/owner | https://github.com/owner/repo | https://github.com/owner/repo/pull/123. git: any clone URL. s3: https://bucket.s3.amazonaws.com/prefix/ or https://account.r2.cloudflarestorage.com/...",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true,
+      "example": "https://github.com/octocat"
+    },
+    "global_search_query": {
+      "title": "Search query (global_github mode)",
+      "description": "Required for global_github mode. Used as the GitHub Code Search query to discover candidate repos. Examples: 'CASHFREE_APP_ID', 'rzp_live_', '\"sk-ant-api03-\"'.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true,
+      "example": "rzp_live_"
+    },
+    "global_max_repos": {
+      "title": "Max unique repos to scan (global_github mode)",
+      "description": "Cap on how many unique repos to scan. Each repo runs betterleaks separately, so cost scales linearly. Default 25.",
+      "type": "integer",
+      "editor": "number",
+      "default": 25,
+      "minimum": 1,
+      "maximum": 200,
+      "nullable": true
+    },
+    "github_token": {
+      "title": "GitHub Personal Access Token",
+      "description": "Required for github mode (recommended) and REQUIRED for global_github mode (Code Search is auth-only). Generate at github.com/settings/tokens. 'public_repo' scope is enough for public repos.",
+      "type": "string",
+      "editor": "textfield",
+      "isSecret": true,
+      "nullable": true,
+      "sectionCaption": "GitHub auth"
+    },
+    "include": {
+      "title": "Include these resource types (github mode)",
+      "description": "Pick which GitHub surfaces to scan. Default = repos.",
+      "type": "array",
+      "editor": "select",
+      "items": {
+        "type": "string",
+        "enum": [
+          "repos",
+          "forks",
+          "prs",
+          "pr-comments",
+          "issues",
+          "issue-comments",
+          "actions",
+          "action-artifacts",
+          "discussions",
+          "releases",
+          "release-assets",
+          "gists"
+        ]
+      },
+      "uniqueItems": true,
+      "nullable": true,
+      "sectionCaption": "GitHub resource selection (github / global_github modes)"
+    },
+    "exclude": {
+      "title": "Exclude these resource types (github mode)",
+      "description": "Subtracts from the include list. Lets you scan everything except certain resource types.",
+      "type": "array",
+      "editor": "select",
+      "items": {
+        "type": "string",
+        "enum": [
+          "repos",
+          "forks",
+          "prs",
+          "pr-comments",
+          "issues",
+          "issue-comments",
+          "actions",
+          "action-artifacts",
+          "discussions",
+          "releases",
+          "release-assets",
+          "gists"
+        ]
+      },
+      "uniqueItems": true,
+      "nullable": true
+    },
+    "exclude_repo": {
+      "title": "Exclude repos matching these glob patterns (github mode)",
+      "description": "Examples: 'archived-*', 'docs-*'.",
+      "type": "array",
+      "editor": "stringList",
+      "uniqueItems": true,
+      "nullable": true
+    },
+    "actions_workflow": {
+      "title": "Only scan these GitHub Actions workflow files (github mode)",
+      "description": "Workflow filenames like 'ci.yml'. Empty = scan all workflows.",
+      "type": "array",
+      "editor": "stringList",
+      "uniqueItems": true,
+      "nullable": true
+    },
+    "since": {
+      "title": "Only scan API items created after this date (github mode)",
+      "description": "YYYY-MM-DD or RFC3339.",
+      "type": "string",
+      "editor": "datepicker",
+      "nullable": true
+    },
+    "until": {
+      "title": "Only scan API items created before this date (github mode)",
+      "type": "string",
+      "editor": "datepicker",
+      "nullable": true,
+      "description": "github mode. Pair with 'since' for a date window."
+    },
+    "git_workers": {
+      "title": "Parallel git workers per repo",
+      "description": "git / github modes. 0 = single process (lowest memory). Higher = faster, more memory.",
+      "type": "integer",
+      "editor": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 64,
+      "nullable": true,
+      "sectionCaption": "Git scanning options"
+    },
+    "log_opts": {
+      "title": "Git log options pass-through",
+      "description": "git / github modes. Passed verbatim to 'git log'. Examples: '--all --since=2024-01-01', '--author=alice', '-S secret_string'.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true
+    },
+    "git_platform": {
+      "title": "Git platform (link format)",
+      "description": "git mode. Used to generate permalinks. 'github' or 'gitlab'.",
+      "type": "string",
+      "editor": "select",
+      "enum": [
+        "",
+        "github",
+        "gitlab"
+      ],
+      "nullable": true
+    },
+    "validation": {
+      "title": "Enable live secret validation",
+      "description": "Probe each detected secret against its vendor API. Off by default. Only rules that ship with a 'validate' CEL clause will actually probe.",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": false,
+      "sectionCaption": "Validation"
+    },
+    "validation_status": {
+      "title": "Only include findings with these validation statuses",
+      "description": "Comma-separated list. Options: valid, invalid, revoked, unknown, error. Empty = include all.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true,
+      "example": "valid,revoked"
+    },
+    "validation_timeout": {
+      "title": "Validation HTTP request timeout (seconds)",
+      "description": "Per-request timeout for vendor API probes. Default 10s.",
+      "type": "integer",
+      "editor": "number",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 300,
+      "nullable": true
+    },
+    "validation_workers": {
+      "title": "Concurrent validation workers",
+      "description": "Parallel validation HTTP requests. Default 10.",
+      "type": "integer",
+      "editor": "number",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 100,
+      "nullable": true
+    },
+    "validation_debug": {
+      "title": "Include raw HTTP responses in validation output",
+      "description": "Useful for debugging CEL validators. Verbose.",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": false
+    },
+    "validation_extract_empty": {
+      "title": "Include empty extractor values in ValidationMeta",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": false,
+      "description": "Include validation extractor results even when they are empty strings."
+    },
+    "validation_env_vars": {
+      "title": "Env vars accessible to validation CEL",
+      "description": "Comma-separated env var names. Some rules' validators need extra credentials.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true
+    },
+    "s3_access_key": {
+      "title": "S3 access key (s3 mode)",
+      "description": "Leave blank + check 'Anonymous' for public buckets.",
+      "type": "string",
+      "editor": "textfield",
+      "isSecret": true,
+      "nullable": true,
+      "sectionCaption": "S3 (s3 mode only)"
+    },
+    "s3_secret_key": {
+      "title": "S3 secret key (s3 mode)",
+      "type": "string",
+      "editor": "textfield",
+      "isSecret": true,
+      "nullable": true,
+      "description": "s3 mode. Paired with access key for AWS / S3-compatible authentication."
+    },
+    "s3_session_token": {
+      "title": "S3 session token (s3 mode)",
+      "description": "For IAM role / temporary credentials.",
+      "type": "string",
+      "editor": "textfield",
+      "isSecret": true,
+      "nullable": true
+    },
+    "s3_anonymous": {
+      "title": "Anonymous (s3 mode - public buckets only)",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": false,
+      "description": "s3 mode. Skip credentials entirely - scans only public buckets/objects."
+    },
+    "s3_region": {
+      "title": "S3 region (s3 mode)",
+      "description": "Required for non-AWS endpoints. 'auto' for R2, 'us-east-1' for AWS, etc.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true
+    },
+    "s3_max_object_size": {
+      "title": "S3 max object size (bytes)",
+      "description": "Skip objects larger than this. 0 = default 250 MiB.",
+      "type": "integer",
+      "editor": "number",
+      "default": 0,
+      "minimum": 0,
+      "nullable": true
+    },
+    "s3_workers": {
+      "title": "S3 concurrent object fetches",
+      "description": "0 = default 16.",
+      "type": "integer",
+      "editor": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 256,
+      "nullable": true
+    },
+    "dir_source_url": {
+      "title": "Tarball / zip URL to download (dir mode)",
+      "description": "Public HTTPS URL of a .tar.gz or .zip archive. We download, extract, then run 'betterleaks dir' on it.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true,
+      "example": "https://example.com/codebase.tar.gz",
+      "sectionCaption": "dir / stdin sources"
+    },
+    "dir_follow_symlinks": {
+      "title": "Follow symlinks (dir mode)",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": false,
+      "description": "dir mode. Scan files that are symbolic links to other files."
+    },
+    "stdin_content": {
+      "title": "Raw text content to scan (stdin mode)",
+      "description": "Paste the full text you want scanned. Limited by Apify input size cap (~5MB).",
+      "type": "string",
+      "editor": "textarea",
+      "nullable": true
+    },
+    "redact": {
+      "title": "Redact secrets in output (0-100)",
+      "description": "Percentage of secret to MASK in output (0 = show all, 75 = show 25% / mask 75%, 100 = fully redacted). Useful when sharing findings externally.",
+      "type": "integer",
+      "editor": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 100,
+      "nullable": true,
+      "sectionCaption": "Output formatting"
+    },
+    "match_context": {
+      "title": "Context around each match",
+      "description": "Format: 'NL' for N lines (e.g. '5L') or 'NC' for N characters (e.g. '100C'). Empty = no context.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true,
+      "example": "5L"
+    },
+    "verbose": {
+      "title": "Verbose scan log",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": false,
+      "description": "Enable detailed scan progress in the actor log."
+    },
+    "log_level": {
+      "title": "Log level",
+      "description": "trace / debug / info / warn / error / fatal.",
+      "type": "string",
+      "editor": "select",
+      "enum": [
+        "",
+        "trace",
+        "debug",
+        "info",
+        "warn",
+        "error",
+        "fatal"
+      ],
+      "default": "",
+      "nullable": true
+    },
+    "legacy_print": {
+      "title": "Use legacy key-value verbose format",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": false,
+      "description": "Use the legacy gitleaks-style verbose output format (key/value pairs)."
+    },
+    "no_color": {
+      "title": "Disable color in output",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": true,
+      "description": "Disable ANSI color codes in the verbose output. Default ON for cloud logs."
+    },
+    "no_banner": {
+      "title": "Suppress betterleaks banner",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": true,
+      "description": "Suppress the betterleaks ASCII banner at start of run. Default ON for cleaner logs."
+    },
+    "enable_rule": {
+      "title": "Only run these rule IDs",
+      "description": "Whitelist. Empty = run all built-in rules.",
+      "type": "array",
+      "editor": "stringList",
+      "uniqueItems": true,
+      "nullable": true,
+      "sectionCaption": "Rule control"
+    },
+    "custom_config_toml": {
+      "title": "Custom betterleaks config (TOML)",
+      "description": "Paste a full TOML config to override built-in rules. See https://github.com/betterleaks/betterleaks/blob/main/.betterleaks.toml",
+      "type": "string",
+      "editor": "textarea",
+      "nullable": true
+    },
+    "ignore_gitleaks_allow": {
+      "title": "Ignore 'gitleaks:allow' comments in code",
+      "description": "When ON, allowlist comments in source code are ignored.",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": false
+    },
+    "gitleaks_ignore_path": {
+      "title": "Path to gitleaks ignore file",
+      "description": "Default '.'.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true
+    },
+    "baseline_url": {
+      "title": "Baseline report URL",
+      "description": "Public HTTPS URL of a previous report JSON. Findings present in baseline will be filtered out (only NEW leaks are reported).",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true,
+      "sectionCaption": "Advanced: baseline / archives / timeouts"
+    },
+    "max_target_megabytes": {
+      "title": "Max file size to scan (MB)",
+      "description": "Skip files larger than this. Default 100.",
+      "type": "integer",
+      "editor": "number",
+      "default": 100,
+      "minimum": 0,
+      "maximum": 5000,
+      "nullable": true
+    },
+    "max_archive_depth": {
+      "title": "Max nested archive scanning depth",
+      "description": "0 = do not extract archives. Higher values let scanner reach into zip-in-zip-in-jar.",
+      "type": "integer",
+      "editor": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 10,
+      "nullable": true
+    },
+    "max_decode_depth": {
+      "title": "Recursive decoding depth limit",
+      "description": "Default 5. Controls how deep base64/url-decoding goes.",
+      "type": "integer",
+      "editor": "number",
+      "default": 5,
+      "minimum": 0,
+      "maximum": 20,
+      "nullable": true
+    },
+    "timeout_seconds": {
+      "title": "Command timeout (seconds, 0 = no limit)",
+      "description": "Hard cap on the whole scan duration.",
+      "type": "integer",
+      "editor": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 7200,
+      "nullable": true
+    },
+    "regex_engine": {
+      "title": "Regex engine",
+      "description": "Default re2 (fast, no backtracking). stdlib supports more features.",
+      "type": "string",
+      "editor": "select",
+      "enum": [
+        "",
+        "re2",
+        "stdlib"
+      ],
+      "default": "",
+      "nullable": true
+    },
+    "experiments": {
+      "title": "Comma-separated experimental features",
+      "description": "Upstream feature flags. Refer to betterleaks docs.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true
+    },
+    "report_template": {
+      "title": "Report template content",
+      "description": "Go text/template content for custom report format. Advanced.",
+      "type": "string",
+      "editor": "textarea",
+      "nullable": true
+    },
+    "diagnostics": {
+      "title": "Enable diagnostics",
+      "description": "Comma-separated: cpu, mem, trace, http. Outputs perf profiles to the actor log.",
+      "type": "string",
+      "editor": "textfield",
+      "nullable": true,
+      "sectionCaption": "Diagnostics (advanced)"
+    },
+    "exit_on_findings": {
+      "title": "Exit with code 1 when findings are present",
+      "description": "Default ON. Turn OFF for monitoring (run never fails on leaks).",
+      "type": "boolean",
+      "editor": "checkbox",
+      "default": true,
+      "sectionCaption": "Exit behavior"
+    }
+  },
+  "required": [
+    "mode"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "actorSpecification": 1,
+  "name": "betterleaks-cloud",
+  "title": "Betterleaks Cloud - GitHub, Git, S3, Dir Secret Scanner",
+  "description": "Cloud-hosted Betterleaks v1.3.1 (Gitleaks successor by the original author). 6 modes: github (org/user/PR/issue/gist), global_github (Code Search picks repos), git (clone URL), s3 (AWS/R2/MinIO), dir (download a tarball), stdin (paste text). Every upstream flag exposed; optional live secret validation.",
+  "version": "0.3",
+  "buildTag": "latest",
+  "input": "./INPUT_SCHEMA.json",
+  "output": "./output_schema.json",
+  "storages": {
+    "dataset": {
+      "actorSpecification": 1,
+      "title": "Betterleaks Findings",
+      "views": {
+        "overview": {
+          "title": "Findings",
+          "description": "All detected secrets - one record per finding.",
+          "transformation": {
+            "fields": [
+              "RuleID",
+              "Description",
+              "Secret",
+              "Match",
+              "ValidationStatus",
+              "StartLine",
+              "EndLine",
+              "Fingerprint",
+              "Tags",
+              "CaptureGroups",
+              "Attributes",
+              "Fragment",
+              "ValidationReason",
+              "ValidationMeta"
+            ]
+          },
+          "display": {
+            "component": "table",
+            "properties": {
+              "RuleID":           {"label": "Rule"},
+              "Description":      {"label": "Description"},
+              "Secret":           {"label": "Secret value"},
+              "Match":            {"label": "Match"},
+              "ValidationStatus": {"label": "Live?"},
+              "StartLine":        {"label": "Line"},
+              "EndLine":          {"label": "End line"},
+              "Fingerprint":      {"label": "Fingerprint"},
+              "Tags":             {"label": "Tags"},
+              "CaptureGroups":    {"label": "Capture groups"},
+              "Attributes":       {"label": "Attributes"},
+              "Fragment":         {"label": "Source"},
+              "ValidationReason": {"label": "Validation reason"},
+              "ValidationMeta":   {"label": "Validation metadata"}
+            }
+          }
+        },
+        "live_only": {
+          "title": "Live secrets only",
+          "description": "Filter to findings where validation succeeded — these are still active credentials.",
+          "transformation": {
+            "fields": [
+              "RuleID",
+              "Secret",
+              "ValidationStatus",
+              "ValidationMeta",
+              "Fragment",
+              "Fingerprint"
+            ]
+          },
+          "display": {
+            "component": "table",
+            "properties": {
+              "RuleID":           {"label": "Rule"},
+              "Secret":           {"label": "Secret"},
+              "ValidationStatus": {"label": "Status"},
+              "ValidationMeta":   {"label": "Live metadata"},
+              "Fragment":         {"label": "Source"},
+              "Fingerprint":      {"label": "Fingerprint"}
+            }
+          }
+        }
+      }
+    }
+  },
+  "dockerfile": "./Dockerfile",
+  "readme": "./README.md",
+  "minMemoryMbytes": 1024,
+  "maxMemoryMbytes": 4096,
+  "categories": ["DEVELOPER_TOOLS", "OTHER"],
+  "seoTitle": "Betterleaks Cloud - GitHub Secret Scanner + Validator",
+  "seoDescription": "Find leaked API keys & wallet private keys across GitHub orgs, users, PRs, gists & S3 buckets. Uses Betterleaks (Gitleaks successor). Optional live validation probes against vendor APIs."
+}

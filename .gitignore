@@ -1,0 +1,23 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+.idea/
+.vscode/
+
+# Apify local storage (contains scan inputs + outputs with real credentials)
+storage/
+apify_storage/
+
+# Local scan outputs that may contain real harvested keys
+cloud-results-*/
+test-results-*/
+findings/
+*.findings.json
+
+# Local secrets
+.env
+.env.local

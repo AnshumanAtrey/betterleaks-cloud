@@ -1,0 +1,20 @@
+{
+    "actorOutputSchemaVersion": 1,
+    "title": "Betterleaks Cloud Output",
+    "description": "Findings emitted by the upstream betterleaks scanner. Each dataset record is a Finding struct from betterleaks's JSON report (RuleID, Secret, Match, Fragment with source info, Attributes, optional ValidationStatus when --validation is on).",
+    "type": "object",
+    "properties": {
+        "findings": {
+            "type": "string",
+            "title": "Findings",
+            "description": "Default dataset. One record per detected secret. Filter by ValidationStatus=valid to see only live, exploitable credentials when validation was enabled.",
+            "template": "{{links.apiDefaultDatasetUrl}}/items"
+        },
+        "log": {
+            "type": "string",
+            "title": "Run Log",
+            "description": "Full betterleaks scan log including subprocess stdout/stderr.",
+            "template": "{{links.publicRunUrl}}/log"
+        }
+    }
+}
