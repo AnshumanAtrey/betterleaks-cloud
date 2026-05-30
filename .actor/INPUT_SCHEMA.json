@@ -9,6 +9,7 @@
       "type": "string",
       "editor": "select",
       "default": "github",
+      "prefill": "stdin",
       "enum": [
         "github",
         "global_github",
@@ -309,7 +310,8 @@
       "description": "Paste the full text you want scanned. Limited by Apify input size cap (~5MB).",
       "type": "string",
       "editor": "textarea",
-      "nullable": true
+      "nullable": true,
+      "prefill": "# demo .env scanned by Betterleaks (stdin mode)\nDB_HOST=db.internal.example.com\nGITHUB_TOKEN=ghp_A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8\n-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDfakefakefakeKEY\n-----END PRIVATE KEY-----\n"
     },
     "redact": {
       "title": "Redact secrets in output (0-100)",
