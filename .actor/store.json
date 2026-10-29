@@ -1,0 +1,18 @@
+{
+  "$comment": "Store listing fields that apify push never sends. Applied by scripts/store-metadata.mjs after every deploy. Title, description and categories live in actor.json (copied from the live listing on 2026-10-29, so adding the CI kit changed nothing else).",
+  "actorId": "W9rZtRWoH92Ra8P12",
+  "seoTitle": "Betterleaks Cloud - GitHub Secret Scanner + Validator",
+  "seoDescription": "Find leaked API keys & wallet private keys across GitHub orgs, users, PRs, gists & S3 buckets. Uses Betterleaks (Gitleaks successor). Optional live validation probes against vendor APIs.",
+  "exampleRunInput$comment": "The prefill (a demo .env with fake secrets, stdin mode). Until 2026-10-29 the live example was the template's { \"helloWorld\": 123 }.",
+  "exampleRunInput": {
+    "mode": "stdin",
+    "stdin_content": "# demo .env scanned by Betterleaks (stdin mode)\nDB_HOST=db.internal.example.com\nGITHUB_TOKEN=ghp_A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8\n-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDfakefakefakeKEY\n-----END PRIVATE KEY-----\n"
+  },
+  "actorPermissionLevel": "LIMITED_PERMISSIONS",
+  "isPublic": true,
+  "defaultRunOptions": {
+    "build": "latest",
+    "memoryMbytes": 4096,
+    "timeoutSecs": 3600
+  }
+}
