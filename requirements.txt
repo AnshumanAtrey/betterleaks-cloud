@@ -1,1 +1,4 @@
 apify ~= 3.4.0
+# src/code_search.py imports requests. It was never declared and came in transitively until a
+# rebuild on 2026-10-29 (build 0.3.5) resolved without it, and every run crashed at import.
+requests>=2.31
