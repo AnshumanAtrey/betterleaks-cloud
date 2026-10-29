@@ -276,13 +276,14 @@ async def main() -> None:
     )
 
     async with Actor:
-        try:
-            await Actor.charge("actor_start")
-        except Exception:
-            pass
-
         inputs = await Actor.get_input() or {}
         mode = inputs.get("mode", "github")
+
+        # A limit the user or their plan set is an answer, not a fault: say so and charge nothing.
+        if not _limit_can_pay("actor_start", "per_repo_scanned"):
+            await _safe_status("Nothing was scanned and nothing was charged: this run's spending limit cannot pay "
+                               "for the start fee and one scan. Raise the run's maximum cost, then run it again.")
+            return
 
         # Verify binary
         try:
@@ -331,6 +332,9 @@ async def main() -> None:
         finally:
             if config_path:
                 config_path.unlink(missing_ok=True)
+        if _LIMIT_HIT:
+            await _safe_status("Stopped at this run's spending limit: the findings it could pay for were delivered "
+                               "and charged. Raise the run's maximum cost to get the rest.")
 
 
 def _apply_baseline_arg(cmd: list[str], inputs: dict) -> None:
@@ -358,9 +362,49 @@ def _log_proc_output(proc: subprocess.CompletedProcess, tag: str = "bl") -> None
             Actor.log.info("[%s-err] %s", tag, line)
 
 
+_START_CHARGED = False
+_LIMIT_HIT = False
+
+
+def _limit_can_pay(*events: str) -> bool:
+    """Whether this run's spending limit still pays for these events; Apify says a run must stop at it."""
+    cm = Actor.get_charging_manager()
+    info = cm.get_pricing_info()
+    if not info.is_pay_per_event:
+        return True
+    cost = sum(info.per_event_prices.get(e, 0) for e in events)
+    return info.max_total_charge_usd - cm.calculate_total_charged_amount() >= cost
+
+
+async def _charge_start_once() -> None:
+    """The start fee, charged once a scan has run, so a run that fails on its input (a missing or
+    mistyped target, a clone that fails) costs nothing. It used to be charged before the input was read."""
+    global _START_CHARGED
+    if not _START_CHARGED:
+        _START_CHARGED = True
+        try:
+            await Actor.charge("actor_start")
+        except Exception:
+            pass
+
+
+async def _safe_status(message: str) -> None:
+    try:
+        await Actor.set_status_message(message)
+    except Exception:  # noqa: BLE001
+        pass
+
+
 async def _push_and_charge(findings: list[dict], source_label: str | None = None) -> int:
+    global _LIMIT_HIT
+    await _charge_start_once()
     n = 0
     for f in findings:
+        live = (f.get("ValidationStatus") or "").lower() == "valid"
+        # Charged after the row is saved, so check first that the limit pays for this finding.
+        if not _limit_can_pay("per_finding", *(["per_validated_live"] if live else [])):
+            _LIMIT_HIT = True
+            break
         if source_label:
             f["_source"] = source_label
         await Actor.push_data(f)
@@ -369,7 +413,7 @@ async def _push_and_charge(findings: list[dict], source_label: str | None = None
         except Exception:
             pass
         # Premium charge: only when validation confirmed the secret is LIVE.
-        if (f.get("ValidationStatus") or "").lower() == "valid":
+        if live:
             try:
                 await Actor.charge("per_validated_live")
             except Exception:
@@ -380,6 +424,7 @@ async def _push_and_charge(findings: list[dict], source_label: str | None = None
 
 async def _charge_per_repo_scanned(n: int = 1) -> None:
     """Charge per_repo_scanned event. Used by single-target modes (github/git)."""
+    await _charge_start_once()
     for _ in range(n):
         try:
             await Actor.charge("per_repo_scanned")

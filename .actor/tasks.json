@@ -1,0 +1,37 @@
+{
+  "$comment": "Example tasks published on the Store by scripts/publish-tasks.mjs after every deploy (CI only). Each one is a search people type, with its own Google-indexed landing page and .md (manager/rules/SEO.md). trufflesecurity/test_keys holds fake keys made for secret scanners; the stdin demo holds fake values.",
+  "options": {
+    "build": "latest",
+    "memoryMbytes": 2048,
+    "timeoutSecs": 3600
+  },
+  "tasks": [
+    {
+      "name": "scan-git-repo-history-for-secrets",
+      "title": "Scan a git repo's full history for leaked secrets",
+      "description": "Clone any public git repository and scan every commit with Betterleaks for API keys, tokens, passwords and private keys, each finding with file, line, commit, author and date. Works with GitHub, GitLab or any git URL; the example repo holds test keys made for scanners.",
+      "input": {
+        "mode": "git",
+        "target_url": "https://github.com/trufflesecurity/test_keys.git",
+        "git_platform": "github"
+      },
+      "seoTitle": "Git Secret Scanner - Leaked Keys in Commit History",
+      "seoDescription": "Scan a git repo's full commit history for leaked API keys, tokens and private keys with Betterleaks: file, line, commit and author for each finding.",
+      "inputSchemaFields": ["target_url", "git_platform", "log_opts", "validation"],
+      "datasetView": "overview"
+    },
+    {
+      "name": "scan-env-file-for-leaked-secrets",
+      "title": "Find secrets in a .env or config file: paste it and scan",
+      "description": "Paste the text of a .env file, a config file, a log or any snippet and find the API keys, tokens and private keys in it with Betterleaks' 200+ rules, nothing installed. The example holds fake values; paste yours to check it before you commit or share it.",
+      "input": {
+        "mode": "stdin",
+        "stdin_content": "# demo .env scanned by Betterleaks (stdin mode)\nDB_HOST=db.internal.example.com\nGITHUB_TOKEN=ghp_A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8\n-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDfakefakefakeKEY\n-----END PRIVATE KEY-----\n"
+      },
+      "seoTitle": "Secret Scanner for .env Files - Paste and Scan",
+      "seoDescription": "Paste a .env, config file or log and find the API keys, tokens and private keys in it with 200+ Betterleaks rules. Check before you commit or share.",
+      "inputSchemaFields": ["stdin_content", "validation"],
+      "datasetView": "overview"
+    }
+  ]
+}

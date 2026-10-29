@@ -10,9 +10,127 @@
   },
   "actorPermissionLevel": "LIMITED_PERMISSIONS",
   "isPublic": true,
+  "defaultRunOptions$comment": "2 GB since 2026-10-30, as gitleaks-github-secret-scanner, which scans repos the same way: the stdin example peaked at 52-56 MB (runs 5iZvQgcd2MJjVQNmB, jLFchzW0c3v8mArL5). The start fee is a flat event, so the 4 GB default only doubled the compute Apify bills us per run.",
   "defaultRunOptions": {
     "build": "latest",
-    "memoryMbytes": 4096,
+    "memoryMbytes": 2048,
     "timeoutSecs": 3600
+  },
+  "pricing": {
+    "apply": true,
+    "$comment": "Store discounts (owner's Gentle ladder, rolled out 2026-10-29 after holehe and social-analyzer): Free and Starter keep the flat price, Scale pays 10% less, Business and above 20% less; apify-actor-start stays flat. Aug-Oct paid revenue of this actor came almost all from Starter, and Apify bills our platform cost of Scale and Business runs lower only when discounts are on (compute $0.16 and $0.13 per CU instead of $0.20, https://docs.apify.com/actors/monetize/pricing-and-costs.md). The CI script applies first-time pricing and decreases; increases go through Console with 14 days' notice.",
+    "pricingInfos": [
+      {
+        "pricingModel": "PAY_PER_EVENT",
+        "apifyMarginPercentage": 0.2,
+        "pricingPerEvent": {
+          "actorChargeEvents": {
+            "actor_start": {
+              "eventTitle": "Actor start",
+              "eventDescription": "Charged once per run. Covers actor boot, betterleaks binary cold-start, and result aggregation.",
+              "isPrimaryEvent": true,
+              "eventPriceUsd": 0.05
+            },
+            "per_repo_scanned": {
+              "eventTitle": "Per repo scanned",
+              "eventDescription": "Charged once per repository scanned. Covers the main work unit: clone (if applicable), full history scan with betterleaks, and finding extraction. For github mode with an org/user URL, charges once per repo in the org. For global_github mode, charges once per discovered+scanned repo.",
+              "eventTieredPricingUsd": {
+                "FREE": {
+                  "tieredEventPriceUsd": 0.05
+                },
+                "BRONZE": {
+                  "tieredEventPriceUsd": 0.05
+                },
+                "SILVER": {
+                  "tieredEventPriceUsd": 0.045
+                },
+                "GOLD": {
+                  "tieredEventPriceUsd": 0.04
+                },
+                "PLATINUM": {
+                  "tieredEventPriceUsd": 0.04
+                },
+                "DIAMOND": {
+                  "tieredEventPriceUsd": 0.04
+                }
+              }
+            },
+            "per_finding": {
+              "eventTitle": "Per finding",
+              "eventDescription": "Charged for each detected secret pushed to the dataset. Low per-item cost; scales with scan output.",
+              "eventTieredPricingUsd": {
+                "FREE": {
+                  "tieredEventPriceUsd": 0.01
+                },
+                "BRONZE": {
+                  "tieredEventPriceUsd": 0.01
+                },
+                "SILVER": {
+                  "tieredEventPriceUsd": 0.009
+                },
+                "GOLD": {
+                  "tieredEventPriceUsd": 0.008
+                },
+                "PLATINUM": {
+                  "tieredEventPriceUsd": 0.008
+                },
+                "DIAMOND": {
+                  "tieredEventPriceUsd": 0.008
+                }
+              }
+            },
+            "per_validated_live": {
+              "eventTitle": "Per live-validated secret",
+              "eventDescription": "Premium event. Charged ONLY when validation is enabled AND the vendor API confirms the secret is currently valid (ValidationStatus=valid). Dead/invalid/revoked findings do NOT incur this charge. This is the high-signal output.",
+              "eventTieredPricingUsd": {
+                "FREE": {
+                  "tieredEventPriceUsd": 0.3
+                },
+                "BRONZE": {
+                  "tieredEventPriceUsd": 0.3
+                },
+                "SILVER": {
+                  "tieredEventPriceUsd": 0.27
+                },
+                "GOLD": {
+                  "tieredEventPriceUsd": 0.24
+                },
+                "PLATINUM": {
+                  "tieredEventPriceUsd": 0.24
+                },
+                "DIAMOND": {
+                  "tieredEventPriceUsd": 0.24
+                }
+              }
+            },
+            "per_code_search_query": {
+              "eventTitle": "Per Code Search query (global_github mode)",
+              "eventDescription": "Charged when global_github mode uses GitHub Code Search API to discover candidate repos. Fires once per discovery session.",
+              "eventTieredPricingUsd": {
+                "FREE": {
+                  "tieredEventPriceUsd": 0.005
+                },
+                "BRONZE": {
+                  "tieredEventPriceUsd": 0.005
+                },
+                "SILVER": {
+                  "tieredEventPriceUsd": 0.0045
+                },
+                "GOLD": {
+                  "tieredEventPriceUsd": 0.004
+                },
+                "PLATINUM": {
+                  "tieredEventPriceUsd": 0.004
+                },
+                "DIAMOND": {
+                  "tieredEventPriceUsd": 0.004
+                }
+              }
+            }
+          }
+        },
+        "reasonForChange": "Store discounts: Scale plans pay 10% less and Business and enterprise plans 20% less. Free and Starter prices are unchanged."
+      }
+    ]
   }
 }

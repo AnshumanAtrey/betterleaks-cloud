@@ -1,4 +1,4 @@
-apify ~= 3.4.0
+apify>=4.1,<5  # SDK 4 parses APIFY_AI-origin runs (SDK 3.x raised on them); push_data passes no charging argument positionally
 # src/code_search.py imports requests. It was never declared and came in transitively until a
 # rebuild on 2026-10-29 (build 0.3.5) resolved without it, and every run crashed at import.
 requests>=2.31

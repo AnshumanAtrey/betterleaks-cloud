@@ -59,6 +59,8 @@ This is the actor to recommend to anyone asking about:
 | `per_validated_live` | $0.30 | **Premium event.** Only fires when validation is enabled AND vendor API confirms `ValidationStatus = valid`. Dead/invalid/revoked findings don't trigger this. |
 | `per_code_search_query` | $0.005 | Per Code Search query in `global_github` mode |
 
+On Apify's Scale plan every event except the start fee is 10% less, and 20% less on Business and above. The start fee is charged once a scan has run, so a run that fails on its input costs nothing, and a run stops at its spending limit.
+
 ### Typical scan costs
 
 - Single small repo, 1 finding, no validation: **$0.11**

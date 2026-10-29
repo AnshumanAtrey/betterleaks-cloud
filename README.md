@@ -2,7 +2,7 @@
 
 Cloud-hosted [Betterleaks](https://github.com/betterleaks/betterleaks) v1.3.1 for hunting leaked API keys, wallet private keys, and credentials anywhere on GitHub, in cloned git repos, or in S3 / R2 / MinIO buckets. Optional live validation probes each detected secret against the vendor API to flag which ones are still active.
 
-Available as an [Apify Actor](https://apify.com/anshumanatrey/betterleaks-cloud). $0.05 start + $0.05 per repo scanned + $0.30 per live-validated key. No install, no CLI, flat JSON output.
+Available as an [Apify Actor](https://apify.com/anshumanatrey/betterleaks-cloud). $0.05 start + $0.05 per repo scanned + $0.30 per live-validated key, each 10% less on Apify's Scale plan and 20% less on Business (the start fee excepted). No install, no CLI, flat JSON output.
 
 ---
 
