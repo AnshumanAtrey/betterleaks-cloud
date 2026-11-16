@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "betterleaks-cloud": {
+      "url": "https://mcp.apify.com?tools=anshumanatrey/betterleaks-cloud",
+      "headers": {
+        "Authorization": "Bearer <YOUR_APIFY_TOKEN>"
+      }
+    }
+  }
+}
